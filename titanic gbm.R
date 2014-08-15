@@ -1,6 +1,7 @@
 #GBM: Generalized Boosted Models
 #an ensemble of classification or regression trees
-#can do both AdaBoost and Gradient Boosting using the gbm package
+#with the gbm package, you can do both a few different kinds including 
+#AdaBoost and Gradient Boosting 
 
 
 #GBM vs Random Forests:
@@ -36,10 +37,11 @@ require(gbm)
 
 
 
-
-
 ############# Load and transform data #################
 setwd("/home/campbwa/Dropbox/kaggle competitions/titanic/")
+
+train = read.csv("https://raw.githubusercontent.com/campbwa/R-videos/master/train.csv")
+
 
 #I filled in missing ages using a linear model 
 #(see the logistic regression video)
@@ -88,9 +90,6 @@ head(train)
 
 
 ########## The model #############
-#set a seed to get reproducible results
-set.seed(123)
-
 #as always, look at the help page for the function
 ?gbm
 
@@ -98,19 +97,21 @@ set.seed(123)
 pr = 0
 tr = 0
 n.models = 5 #the number of models to run
+#the end prediction will be the average over these models
 ntrees = 2000
 
 #how to tune parameters? 
 #There are more parameters to choose than with a Random Forest
 #test different parameters with Cross Validation 
-#(I'll do another video on this topic)
+#see the other video on this topic
 
 
 
 for (i in 1:n.models){
   GBM.model = gbm.fit( 
 
-    x = train[1:end_trn,], y = survived,
+    x = train[1:end_trn,]
+    , y = survived
     #two ways to fit the model
     #use gbm.fit if you are going to specify x = and y = 
     #instead of using a formula
@@ -118,33 +119,36 @@ for (i in 1:n.models){
     #x and y instead of using a formula
     
     
-    distribution = "gaussian", 
-    #other values are "bernoulli" "adaboost"
+    , distribution = "bernoulli"
+    #use bernoulli for binary outcomes
+    #other values are "gaussian" for GBM regression 
+    #or "adaboost"
     
     
-    n.trees = ntrees,
-    #not sure how to choose this!
+    , n.trees = ntrees
+    #Choose this value to be large, then we will prune the
+    #tree after running the model
     
     
-    shrinkage = 0.0005, 
+    , shrinkage = 0.001 
     #smaller values of shrinkage (al-
     #most) always give improved predictive performance.
     #the cost is that the model takes longer to run for smaller values
     
     
-    interaction.depth = 25,
+    , interaction.depth = 5
     #use cross validation to choose interaction depth!!
     
     
-    n.minobsinnode = 5, 
+    , n.minobsinnode = 5
     #n.minobsinnode has an important effect on overfitting!
     #if you set it equal to 1, it would probably perfectly 
     #fit all observations in the sample
     #decreasing this parameter increases the in-sample fit, 
     #but results in overfitting
     
-    
-    verbose = TRUE) #print the preliminary output
+#     , var.monotone = c()    
+    , verbose = TRUE) #print the preliminary output
     
   
   #test set predictions
@@ -167,6 +171,9 @@ summary(GBM.model)
 #If you see one variable that's much more important than all of the rest,
 #that could be evidence of overfitting.
 
+
+#look at the effects of each variable, does it make sense?
+
 ###########################################
 
 
@@ -184,6 +191,8 @@ summary(GBM.model)
 #round the predictions to zero or one
 pr = round(pr)
 tr = round(tr)
+#could also mess around with different cutoff values
+#would need CV to determine the best
 
 
 head(tr, n = 20)
@@ -193,6 +202,7 @@ head(survived, n = 20)
 
 #in sample classification accuracy
 1 - sum(abs(survived - tr)) / nrow(train) 
+#depending upon the tuning parameters, 
 #I've gotten this as high as 99%, but that model 
 #resulted in lower test set scores
 
