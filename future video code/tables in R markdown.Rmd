@@ -1,0 +1,196 @@
+---
+title: "Tables in `R` Markdown"
+author: "Wallace Campbell"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+ ioslides_presentation:
+    widescreen: TRUE
+    fig_width: 10
+    css: css/format.css
+    logo: misc/ace_analytics_logo.png
+---
+
+## Standard table methods look good, but there is no flexibility and they take up a lot of space!
+
+```{r,echo=FALSE,message=FALSE,results='asis', warning=FALSE,comment=FALSE}
+
+data(mtcars)
+library(knitr)
+kable(mtcars[1:5,])
+
+```
+
+
+## Changing table properties using css file
+
+
+## Can also use `pander` to create the same table
+
+
+```{r,echo=FALSE,message=FALSE,results='asis', warning=FALSE,comment=FALSE}
+
+library(pander)
+pander(mtcars[1:5,])
+
+```
+
+
+
+## Use ReporteRs package
+
+```{r,echo=FALSE,message=FALSE,results='asis', warning=FALSE,comment=FALSE}
+
+# http://davidgohel.github.io/ReporteRs/FlexTable.html
+
+library(ReporteRs)
+library(boot)
+library(dplyr)
+
+
+
+
+
+
+
+
+# FlexTable( data = mtcars[1:10,], add.rownames = TRUE, 
+#   header.cell.props = cellProperties( background.color = "#00557F" ), 
+#   header.text.props = textProperties( color = "white", 
+#     font.size = 11, font.weight = "bold" ), 
+#   body.text.props = textProperties( font.size = 10 )
+# )
+
+cat(as.html(FlexTable( data = mtcars[1:10,], add.rownames = TRUE, 
+  header.cell.props = cellProperties( background.color = "#00557F" ), 
+  header.text.props = textProperties( color = "white", 
+    font.size = 11, font.weight = "bold" ), 
+  body.text.props = textProperties( font.size = 10 )
+)))
+
+
+
+# ```{r, results='asis'}
+# library(ReporteRs)
+# tabl = FlexTable( mtcars,
+#                   header.cell.props = cellProperties( background.color = "#003366" ),
+#                   header.text.props = textBold( color = "white" ),
+#                   add.rownames = TRUE )
+# tabl = setZebraStyle( tabl, odd = "#DDDDDD", even = "#FFFFFF" )
+# cat(as.html(tabl))
+# ```
+
+
+
+# library(ReporteRs)
+# # Create a docx object
+# doc = docx()
+# # add a document title
+# doc = addParagraph( doc, "A FlexTable example", stylename = "TitleDoc" )
+# # add a section title
+# doc = addTitle( doc, "How to turn a data.frame into a Word table", level = 1 )
+# # some text
+# doc = addParagraph( doc, "We use the mtcars dataset as example.", stylename = "DocDefaults" )
+# # add a table
+# MyFTable = FlexTable( data = mtcars[1:10, ], add.rownames = TRUE )
+# # format body content
+# MyFTable[3:4, "cyl"] = cellProperties( background.color = "red" )
+# MyFTable["Valiant", ] = cellProperties( background.color = "blue" )
+# doc = addFlexTable(doc, MyFTable)
+# # write the doc
+# writeDoc( doc, file = "exemple.docx" )
+# # open the Word doc
+# browseURL("exemple.docx")
+
+```
+
+
+
+## rtable makes it easier to output in Markdown
+
+
+```{r,echo=FALSE,message=FALSE,results='asis', warning=FALSE,comment=FALSE}
+# install.packages("rtable")
+library(rtable)
+# cat(as.html(vanilla.table(mtcars[1:10,])))
+knit_print(FlexTable( data = mtcars[1:10,], add.rownames = TRUE, 
+  header.cell.props = cellProperties( background.color = "#00557F" ), 
+  header.text.props = textProperties( color = "white", 
+    font.size = 11, font.weight = "bold" ), 
+  body.text.props = textProperties( font.size = 10 )
+))
+```
+
+
+## Short version
+
+```{r,echo=FALSE,message=FALSE,results='asis', warning=FALSE,comment=FALSE}
+cat(as.html(vanilla.table(mtcars[1:10,])))
+```
+
+
+
+## Zebra tables
+
+```{r,echo=FALSE,message=FALSE,results='asis', warning=FALSE,comment=FALSE}
+
+cat(as.html(setZebraStyle( vanilla.table(mtcars[1:10,]), odd = '#eeeeee', even = 'white' )))
+
+```
+
+
+
+## Conditional formatting
+
+```{r,echo=FALSE,message=FALSE,results='asis', warning=FALSE,comment=FALSE}
+# the default cellProperties
+myCellProps = cellProperties( padding = 5 )
+MyFTable = FlexTable( data = mtcars[1:10,], header.text.props = textBold()
+  , header.cell.props = myCellProps
+  , body.cell.props= myCellProps )
+
+
+
+# MyFTable[mtcars$hp < 100,] = chprop( myCellProps, background.color = '#666633')
+```
+
+
+
+
+## Using gridExtra
+
+```{r,echo=FALSE,message=FALSE,results=FALSE, warning=FALSE,comment=FALSE}
+library(gridExtra)
+
+tbl = tableGrob(mtcars[1:10,]
+                # , show.rownames = FALSE
+                )
+
+# Use grid.arrange to generate the table for your Markdown output:
+grid.arrange(tbl)
+
+```
+
+
+
+## DT interface to DataTables library
+
+```{r,echo=FALSE,message=FALSE,results=FALSE, warning=FALSE,comment=FALSE}
+# https://rstudio.github.io/DT/
+
+library(devtools)
+# install_github("rstudio/DT")
+
+
+library(DT)
+# datatable(iris)
+
+
+# datatable(head(iris), class = 'cell-border stripe')
+
+```
+
+
+## In conclusion
+
+
+
